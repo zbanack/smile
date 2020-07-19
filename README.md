@@ -1,5 +1,5 @@
-# Smile
-Sentiment Analysis for GameMaker Studio 2.3. Because... why not? Smile for GameMaker Studio 2.3 is based largely off the [vaderSentiment project](https://github.com/vaderSentiment/vaderSentiment-js)
+# Smile 😊
+Sentiment Analysis for GameMaker Studio 2.3. Because... why not? Smile for GameMaker Studio 2.3 is based largely off the [vaderSentiment project](https://github.com/vaderSentiment/vaderSentiment-js).
 
 ![.gif of Smile, GameMaker Language Sentiment Analysis, in action](https://raw.githubusercontent.com/zbanack/smile/master/demo.png)
 
@@ -45,6 +45,16 @@ if (s.working()) {
 	s.analyze("This game makes me happy");
 }
 ```
+
+## TODO
+- Clean up code, add more comments, JSdoc headers
+- Add more delimiters, so non-space characters like commas and punctuation marks are considered separate tokens
+- Double negatives are faulty
+- 'Tone' and more complex sentence structure/English language expressions that I don't have the time nor energy to tackle (e.g. "At first I didn't like thing, but then it started to grow on me" is analyzed as negative in Smile, but it should be closer to neutral; "grow on me" isn't deemed as anything important here)
+- Typos, compounds, and character->symbol replacements aren't considered
+
+## Notice
+Please note that the lexicon included contains some VERY bad language that the authors of this project do not support, condone, nor use. Unfortunately, to better gauge sentiment, one needs data sets containing all types of language.
 
 ## Author
 - Initial work by Zack Banack <[@zackbanack](https://www.twitter.com/zackbanack>
