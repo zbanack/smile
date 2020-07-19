@@ -49,6 +49,16 @@ if (s.working()) {
 }
 ```
 
+If in Smile debug mode, you can output results to the screen in the GUI layer by calling
+```
+s.draw();
+```
+
+You can free Smile from memory at any time by calling
+```
+s.free();
+```
+
 ## TODO
 - Clean up code, add more comments, JSdoc headers
 - Add more delimiters, so non-space characters like commas and punctuation marks are considered separate tokens
