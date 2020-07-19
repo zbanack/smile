@@ -1,5 +1,8 @@
-# Smile 😊
-Sentiment Analysis for GameMaker Studio 2.3. Because... why not? Smile for GameMaker Studio 2.3 is based largely off the [vaderSentiment project](https://github.com/vaderSentiment/vaderSentiment-js).
+# Smile 😊😡
+
+Sentiment Analysis for GameMaker Studio 2.3. ...because Zack insists on using GML for everything. 
+
+Largely based off the [vaderSentiment project](https://github.com/vaderSentiment/vaderSentiment-js).
 
 ![.gif of Smile, GameMaker Language Sentiment Analysis, in action](https://raw.githubusercontent.com/zbanack/smile/master/demo.png)
 
