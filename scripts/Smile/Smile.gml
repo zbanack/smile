@@ -40,7 +40,9 @@ enum TokenType {
 gml_pragma("global", "global.__smile_initialized=false");
 
 /// @function	smile
-/// @desc		smile object
+/// @desc		smile struct
+/// @param		{?bool=false}	start in debug mode
+/// @returns	{struct}
 function smile() constructor {
 	
 	// prevent multi-initializations
@@ -88,6 +90,8 @@ function smile() constructor {
 	
 	/// @function	json_map
 	/// @desc		pushes file-parsed json contents into dictionaries
+	/// @param		{map}	json-parsed map
+	/// @returns	{bool}	truthy	-	whether the dictionary was constructed successfully
 	static json_map = function(json) {
 		
 		if (!ds_map_exists(json, "lexicon")) return false;
@@ -103,6 +107,7 @@ function smile() constructor {
 			if (!ds_exists(entry, ds_type_list)) continue;
 			if (ds_list_size(entry) != 2) continue;
 			
+			// check for word-value pair
 			var word, value;
 			word	= ds_list_find_value(entry, 0);
 			value	= ds_list_find_value(entry, 1);
@@ -111,6 +116,7 @@ function smile() constructor {
 			
 			var len = string_length(word);
 			
+			// limit word lengths
 			if (len>=MAX_WORD_LENGTH || len<1) continue;
 			
 			ds_map_set(dictionary[len], word, value);
@@ -143,6 +149,7 @@ function smile() constructor {
 	
 	/// @function	init_lexicon
 	/// @desc		initializes lexicon data structures by reading the text file->populating maps
+	/// @returns	{bool}	truthy	-	whether the lexicon was initialized successfully
 	static init_lexicon = function() {
 		
 		var contents, map;
@@ -150,7 +157,7 @@ function smile() constructor {
 		
 		if (is_undefined(contents)) return false;
 		
-		map			= json_decode(contents);
+		map	= json_decode(contents);
 		
 		if (!ds_exists(map, ds_type_map)) return false;
 		
@@ -167,6 +174,7 @@ function smile() constructor {
 	
 	/// @function	json_list
 	/// @desc		pushes file-parsed json contents into lists
+	/// @returns	{bool}	truthy	-	whether the list was constructed successfully
 	static json_list = function(map, list, key) {
 		
 		if (!ds_map_exists(map, key)) return false;
@@ -184,6 +192,7 @@ function smile() constructor {
 	/// @function	tokenize
 	/// @desc		tokenizes all words in a string, separated by space delimiters
 	/// @TODO		add more delimiters, like commas and puncuation
+	/// @returns	{array}	array of strings to tokenize
 	static tokenize = function(str) {
 		
 		var del = " ";
@@ -193,6 +202,9 @@ function smile() constructor {
 	
 	/// @function	explode
 	/// @desc		splits a string into an array based on delimiters
+	/// @param		{string}	str	-	string to explode
+	/// @param		{string}	del	-	delimiter used in string separation
+	/// @returns	{array}	array of strings
 	static explode = function(str, del) {
 		
 		var occurrences = string_count(del, str)
@@ -212,6 +224,7 @@ function smile() constructor {
 	
 	/// @function	init_flavors
 	/// @desc		initializes 'flavor' (boosters, negators)by reading the text file->populating respective lists
+	/// @returns	{bool}	truthy	-	whether the flavors were initialized successfully
 	static init_flavors = function() {
 		
 		var contents, map;
@@ -235,7 +248,9 @@ function smile() constructor {
 	}
 	
 	/// @function	normalize
+	/// @param		{real}	score	-	score to normalize
 	/// @desc		levels out the accumulated sentiment score from -1 to 1 using an alpha
+	/// @returns	{real}	number between -1 and 1
 	static normalize = function(_score) {
 
 		return clamp(_score / sqrt(_score * _score + NORMALIZED_ALPHA), -1, 1);
@@ -243,7 +258,9 @@ function smile() constructor {
 	}
 	
 	/// @function	elapsed
+	/// @param		{real}	start	-	when the timer started
 	/// @desc		helper for formatting elapsed microseconds
+	/// @returns	{string}	time-formatted string
 	static elapsed = function(start) {
 		
 		return string_format((get_timer() - start) / 1000000, 8, 8) + "s";
@@ -268,6 +285,7 @@ function smile() constructor {
 			pass = false;
 		}
 		
+		// failed to initialize successfully
 		if (!pass) {
 			free();
 			return;
@@ -279,7 +297,9 @@ function smile() constructor {
 	}
 	
 	/// @function	sentiment_string
+	/// @param		{real}	score	-	value between -1 and 1
 	/// @desc		interprets the score into easily-readable strings
+	/// @returns	{strring}	string most closely associated with sentiment score
 	static sentiment_string = function(_score) {
 		
 		var arr = ["Very negative", "Negative", "Neutral", "Positive", "Very positive"];
@@ -289,7 +309,9 @@ function smile() constructor {
 	}
 	
 	/// @function	analyze
+	/// @param		{string}	input	-	string to analyze sentiment of
 	/// @desc		this is where the magic happens; analyze strings of text!
+	/// @returns	{real}	score between -1 and 1
 	static analyze = function(input) {
 		
 		var time = get_timer();
@@ -411,7 +433,10 @@ function smile() constructor {
 }
 
 /// @function	Token
-/// @desc		token object
+/// @param		{string}	token name
+/// @param		{parent}	token parent; smile struct
+/// @desc		token struct
+/// @returns	{struct}
 function Token(_name, _parent) constructor {
 	
 	_token = self;
@@ -425,16 +450,18 @@ function Token(_name, _parent) constructor {
 	
 	/// @function	get_sentiment
 	/// @desc		gets the individual sentiment value of a word
+	/// @returns	{real}	sentiment of token
 	static get_sentiment = function() {
 		
 		var cleaned, len, dict;
 		cleaned = string_clean(name);
 		len = string_length(cleaned);
 		
+		// invalid word length
 		if (len>=MAX_WORD_LENGTH || len<1) return 0;
 		
+		// look up word in string length-sized dictionary
 		dict = parent.dictionary[len];
-		
 		if (!ds_map_exists(dict, cleaned)) return 0;
 		
 		return ds_map_find_value(dict, cleaned);
@@ -443,14 +470,46 @@ function Token(_name, _parent) constructor {
 	
 	/// @function	is_uppercase
 	/// @desc		determines whether a word is in caps or not
+	/// @returns	{bool}	truthy	-	whether the string passed is uppercase
 	static is_uppercase = function() {
 		
 		return string_upper(name) == name;
 		
 	}
 	
+	/// @function	string_clean
+	/// @param		{string}	string to clean
+	/// @desc		cleans a string
+	/// @returns	{string}	cleaned string
+	static string_clean = function(str) {
+		
+		var input, output;
+		input = string_lower(str);
+	
+		return input;
+	
+		// @UNUSED, strips all non a-z characters from string
+		/*output = "";
+		
+		for(var i = 1; i <= string_length(input); i++) {
+			
+			var char, order;
+			char = string_char_at(input, i);
+			order = ord(char);
+			
+			if ((order>=97 && order<=122) || order == 32) {
+				output += char;
+			}
+			
+		}
+		
+		return output;*/
+	
+	}
+	
 	/// @function	classify
-	/// @desc		classifies a string of text into a token type
+	/// @desc		classifies the token's text into a token type
+	/// @returns	{int}	TokenType enum
 	static classify = function() {
 		
 		if (is_undefined(name)) return TokenType.NEUTRAL;
@@ -472,14 +531,14 @@ function Token(_name, _parent) constructor {
 	
 	/// @function	init
 	/// @desc		initializes token
-	
 	static init = function() {
 		uppercase			= is_uppercase();
 		_score				= get_sentiment();
 		classification		= classify(_score);
 	}
 	
-	/// @function	freex
+	/// @function	free
+	/// @desc		frees the token frrom memory
 	static free = function() {
 		
 		delete _token;
@@ -487,32 +546,5 @@ function Token(_name, _parent) constructor {
 	}
 	
 	init();
-	
-}
-
-/// @function	string_clean
-function string_clean(str) {
-		
-	var input, output;
-	input = string_lower(str);
-	
-	return input;
-	
-	// @UNUSED, strips all non a-z characters from string
-	/*output = "";
-		
-	for(var i = 1; i <= string_length(input); i++) {
-			
-		var char, order;
-		char = string_char_at(input, i);
-		order = ord(char);
-			
-		if ((order>=97 && order<=122) || order == 32) {
-			output += char;
-		}
-			
-	}
-		
-	return output;*/
 	
 }
